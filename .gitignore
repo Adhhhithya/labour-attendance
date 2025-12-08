@@ -1,0 +1,37 @@
+# Keep source code; ignore environments, datasets, reports, and artifacts
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.log
+
+# Virtual environments
+env/
+venv/
+*.venv/
+J/
+
+# IDE/editor
+.vscode/
+.idea/
+.DS_Store
+
+# Data and generated training artifacts
+Code/TrainingImage/
+Code/TrainingImageLabel/
+Code/StudentDetails/
+Code/ImagesBasic/
+
+# Reports and large documents
+Reports/
+Base Papers/
+smart-attendance/Base Papers/
+*.pdf
+
+
+# Misc
+*.bak
+*.tmp
