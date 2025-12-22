@@ -9,6 +9,7 @@ __pycache__/
 *.log
 
 # Virtual environments
+.env
 env/
 venv/
 *.venv/
@@ -16,6 +17,7 @@ J/
 
 # IDE/editor
 .vscode/
+.vs
 .idea/
 .DS_Store
 
@@ -35,3 +37,8 @@ smart-attendance/Base Papers/
 # Misc
 *.bak
 *.tmp
+
+node_modules/
+known_faces_arc
+attendance.csv
+attendance_arcface.csv

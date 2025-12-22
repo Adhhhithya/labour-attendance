@@ -1,48 +1,72 @@
 import os
 import face_recognition
 import pickle
+import sys
 
-KNOWN_FACES_DIR = "known_faces"
 ENCODINGS_FILE = "encodings.pkl"
 
-known_encodings = []
-known_names = []
+def load_existing_encodings():
+    """Load existing encodings from file if it exists."""
+    if os.path.exists(ENCODINGS_FILE):
+        try:
+            with open(ENCODINGS_FILE, "rb") as f:
+                data = pickle.load(f)
+                return data.get("encodings", []), data.get("names", [])
+        except Exception as e:
+            print(f"[WARN] Could not load existing encodings: {e}")
+    return [], []
 
-# Loop through all images in known_faces/
-for filename in os.listdir(KNOWN_FACES_DIR):
-    if not filename.lower().endswith((".jpg", ".jpeg", ".png")):
-        continue
+def register_new_face(name, image_path):
+    """Register a single face from an image path."""
+    print(f"[INFO] Registering face: {name} from {image_path}")
+    
+    # Load existing encodings
+    known_encodings, known_names = load_existing_encodings()
+    
+    try:
+        # Load the image
+        image = face_recognition.load_image_file(image_path)
+        
+        # Get face encodings
+        encodings = face_recognition.face_encodings(image)
+        
+        if len(encodings) == 0:
+            print(f"[WARN] No face found in {image_path}, skipping.")
+            return False
+        
+        # Add the first face encoding
+        known_encodings.append(encodings[0])
+        known_names.append(name)
+        
+        print(f"[INFO] Successfully registered face for {name}")
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to register face: {e}")
+        return False
+    
+    # Save updated encodings
+    data = {
+        "encodings": known_encodings,
+        "names": known_names
+    }
+    
+    try:
+        with open(ENCODINGS_FILE, "wb") as f:
+            pickle.dump(data, f)
+        print(f"[INFO] Updated {ENCODINGS_FILE} with {len(known_encodings)} total faces")
+        return True
+    except Exception as e:
+        print(f"[ERROR] Failed to save encodings: {e}")
+        return False
 
-    # Name of the person = filename without extension
-    name = os.path.splitext(filename)[0]
-    path = os.path.join(KNOWN_FACES_DIR, filename)
-
-    print(f"[INFO] Processing {path} as {name}")
-
-    # Load the image
-    image = face_recognition.load_image_file(path)
-
-    # Get face encodings (we expect ONE face per image)
-    encodings = face_recognition.face_encodings(image)
-
-    if len(encodings) == 0:
-        print(f"[WARN] No face found in {filename}, skipping.")
-        continue
-
-    # Take the first (and only) face
-    known_encodings.append(encodings[0])
-    known_names.append(name)
-
-print("\n[INFO] Loaded", len(known_encodings), "known faces:")
-print(known_names)
-
-# Optionally save them to a file for later use
-data = {
-    "encodings": known_encodings,
-    "names": known_names
-}
-
-with open(ENCODINGS_FILE, "wb") as f:
-    pickle.dump(data, f)
-
-print(f"[INFO] Saved encodings to {ENCODINGS_FILE}")
+if __name__ == "__main__":
+    # Only accept API input: employee_name and image_path
+    if len(sys.argv) == 3:
+        name = sys.argv[1]
+        image_path = sys.argv[2]
+        success = register_new_face(name, image_path)
+        sys.exit(0 if success else 1)
+    else:
+        print("[ERROR] encodings.py expects exactly 2 arguments: <employee_name> <image_path>")
+        print("Usage: python encodings.py \"John Doe\" \"/path/to/image.jpg\"")
+        sys.exit(1)

@@ -4,7 +4,7 @@ Handles loading known face encodings and names from a pickle file.
 """
 import pickle
 
-ENCODINGS_FILE = "encodings.pkl"
+ENCODINGS_FILE = "C:\\Users\\Admin\\OneDrive\\Documents\\PEP intern\\labour-attendance\\Backend\\encodings.pkl"
 
 
 def load_encodings(path: str = ENCODINGS_FILE):

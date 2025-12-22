@@ -20,7 +20,19 @@ from liveness import BlinkLiveness
 from attendance import AttendanceLogger
 
 
+# Set this to your phone's IP Webcam stream URL (or an int index for a USB cam).
+# Example: "http://192.168.1.6:8080/video" for the IP Webcam app default video feed.
+CAMERA_SOURCE = "http://192.168.1.3:8080/video"
+
+
+def parse_camera_source(arg: str):
+    """Return int for webcam indices, otherwise assume IP/RTSP/HTTP URL."""
+    return int(arg) if arg.isdigit() else arg
+
+
 def main():
+    camera_source = parse_camera_source(CAMERA_SOURCE)
+
     # 1. Load known encodings + names
     print("[INFO] Loading known face encodings...")
     known_encodings, known_names = load_encodings()
@@ -31,13 +43,13 @@ def main():
     attendance_logger = AttendanceLogger(path="attendance.csv")
 
     # 3. Start webcam
-    print("[INFO] Starting webcam...")
-    cap = cv2.VideoCapture(0)
+    print(f"[INFO] Starting camera source: {camera_source}")
+    cap = cv2.VideoCapture(camera_source)
     if not cap.isOpened():
-        print("[ERROR] Could not open webcam.")
+        print("[ERROR] Could not open camera. Check the URL/index and network.")
         return
 
-    print("[INFO] Webcam opened. Press 'q' to quit.")
+    print("[INFO] Camera opened. Press 'q' to quit.")
 
     while True:
         ret, frame = cap.read()
